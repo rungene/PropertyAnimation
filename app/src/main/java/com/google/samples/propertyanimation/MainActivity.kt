@@ -20,6 +20,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -174,9 +175,46 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun colorizer() {
+
+       /* simple example of animating a single property on an object. This time, that property isn’t
+        an android.util.Property object, but is instead a property exposed via a setter,
+        View.setBackgroundColor(int). Since you cannot refer to an android.util.Property object
+        directly, like you did before with ALPHA, etc., you will use the approach of passing in the
+        name of the property as a String. The name is then mapped internally to the appropriate
+        setter/getter information on the target object.*/
+
+   /*     you will fill in the colorizer() function, which is called when you click on
+        colorizerButton. In this animation, you will change the color of the star field background
+        from black to red (and back).*/
+
+        //Animate colors, not integers
+        //n animator that knows how to interpret (and animate between) color values, rather
+    // than simply the integers that represent those colors.
+
+
+     /*   The other thing to notice about this construction of the ObjectAnimator is the property:
+        instead of specifying one of the View properties, like ALPHA, you are simply passing in the
+        string “backgroundColor”. When you do this, the system searches for setters and getters
+        with that exact spelling using reflection. It caches references to those methods and calls
+        them during the animation, instead of calling the Property set/get functions as the
+        previous animations did.*/
+
+        /*Change the animation to take a little longer to run, by setting an explicit duration, and
+        then animate back to black. You should also disable the button during the animation, as you
+        did with the other animations, by calling the extension function created earlier.*/
+        var animator = ObjectAnimator.ofArgb(star.parent,
+                "backgroundColor", Color.BLACK, Color.RED)
+        animator.setDuration(500)
+        animator.repeatCount = 1
+        animator.repeatMode = ObjectAnimator.REVERSE
+        animator.disableViewDuringAnimation(colorizeButton)
+        animator.start()
+
     }
 
     private fun shower() {
     }
+
+   // You can, and should, use ObjectAnimator for all property animations in your application.
 
 }
