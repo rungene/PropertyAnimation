@@ -73,6 +73,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /*Change the disableViewDuringAnimation() function to be an extension function on ObjectAnimator.
+    This makes the function more concise to call, since it eliminates a parameter. It also makes
+    the code a little more natural to read, by putting the animator-related functionality directly
+    onto ObjectAnimator:*/
+
+    private fun ObjectAnimator.disableViewDuringAnimation(view: View) {
+       addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationStart(animation: Animator?) {
+                view.isEnabled = false
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                view.isEnabled = true
+            }
+        })
+    }
+
     private fun rotater() {
        /* create an animation that rotates the ImageView containing the star from a value of
                 -360 to 0. This means that the view, and thus the star inside it, will rotate in
@@ -83,20 +100,19 @@ class MainActivity : AppCompatActivity() {
 
 //        disable the ROTATE button as soon as the animation starts, and then re-enable it when the
 //        animation ends.
-
-        animator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationStart(animation: Animator?) {
-                rotateButton.isEnabled = false
-            }
-            override fun onAnimationEnd(animation: Animator?) {
-                rotateButton.isEnabled = true
-            }
-        })
-
+        animator.disableViewDuringAnimation(rotateButton)
                 animator.start()
     }
 
     private fun translater() {
+        //create an animation that moves the star to the right by 200 pixels and runs it:
+
+        val animator = ObjectAnimator.ofFloat(star, View.TRANSLATION_X, 200f)
+        animator.repeatCount = 1
+        animator.repeatMode = ObjectAnimator.REVERSE
+        //disable their buttons during their respective animations.
+        animator.disableViewDuringAnimation(translateButton)
+        animator.start()
     }
 
     private fun scaler() {
