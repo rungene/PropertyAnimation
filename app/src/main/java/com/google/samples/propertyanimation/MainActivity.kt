@@ -164,6 +164,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun fader() {
+        //Fading is done using the ALPHA property on View.
+        //Animations that fade views in or out animate the alpha value between 0 and 1.
+        val animator = ObjectAnimator.ofFloat(star, View.ALPHA, 0f)
+        animator.repeatCount = 1
+        animator.repeatMode = ObjectAnimator.REVERSE
+        animator.disableViewDuringAnimation(fadeButton)
+        animator.start()
     }
 
     private fun colorizer() {
