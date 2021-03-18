@@ -16,16 +16,18 @@
 
 package com.google.samples.propertyanimation
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.ObjectAnimator
-import android.animation.PropertyValuesHolder
+import android.animation.*
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.LinearInterpolator
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.appcompat.widget.AppCompatImageView
 
 
 class MainActivity : AppCompatActivity() {
@@ -211,9 +213,92 @@ class MainActivity : AppCompatActivity() {
         animator.start()
 
     }
-
+//animating multiple properties on multiple objects.
     private fun shower() {
-    }
+  //  local variables
+
+/*a reference to the star field ViewGroup (which is just the parent of the current star view).
+    the width and height of that container (which you will use to calculate the end translation
+     values for our falling stars).
+    the default width and height of our star (which you will later alter with a scale factor to get
+     different-sized stars).*/
+
+    val container = star.parent as ViewGroup
+    val containerW = container.width
+    val containerH = container.height
+    var starW: Float = star.width.toFloat()
+    var starH: Float = star.height.toFloat()
+
+  /*  Create a new View to hold the star graphic. Because the star is a VectorDrawable asset, use an
+    AppCompatImageView, which has the ability to host that kind of resource.*/
+
+    val newStar = AppCompatImageView(this)
+    newStar.setImageResource(R.drawable.ic_star)
+    newStar.layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT)
+    container.addView(newStar)
+
+  /*  Set the size of the star. Modify the star to have a random size, from .1x to 1.6x of its
+    default size. Use this scale factor to change the cached width/height values, because you will
+    need to know the actual pixel height/width for later calculations.*/
+
+    newStar.scaleX = Math.random().toFloat() * 1.5f + .1f
+    newStar.scaleY = newStar.scaleX
+    starW *= newStar.scaleX
+    starH *= newStar.scaleY
+
+    //You have now cached the star’s pixel H/W stored in starW and starH
+
+/*    Now position the new star. Horizontally, it should appear randomly somewhere from the left edge
+    to the right edge. This code uses the width of the star to position it from half-way off the
+    screen on the left (-starW / 2) to half-way off the screen on the right (with the star
+            positioned at (containerW - starW / 2). The vertical positioning of the star will be
+            handled later in the actual animation code.*/
+
+    newStar.translationX = Math.random().toFloat() *
+            containerW - starW / 2
+
+    //Creating animators for star rotation and falling
+    /*the rotation will use a smooth linear motion (moving at a constant rate over the entire
+            rotation animation), while the falling animation will use an accelerating motion
+    (simulating gravity pulling the star downward at a constantly faster rate).*/
+    val mover = ObjectAnimator.ofFloat(newStar, View.TRANSLATION_Y,
+            -starH, containerH + starH)
+    mover.interpolator = AccelerateInterpolator(1f)
+    val rotator = ObjectAnimator.ofFloat(newStar, View.ROTATION,
+            (Math.random() * 1080).toFloat())
+    rotator.interpolator = LinearInterpolator()
+    //Running the animations in parallel with AnimatorSet
+
+  /*  put these two animators together into a single AnimatorSet, which is useful for this slightly
+    more complex animation involving multiple ObjectAnimators*/
+
+/*
+    AnimatorSet can play animations in parallel, as you will do here, or sequentially (like you might do in
+    the list-fading example mentioned earlier, where you first fade out a view and then animate
+    the resulting gap closed)
+*/
+ /*   Create the AnimatorSet and add the child animators to it (along with information to play
+            them in parallel). The default animation time of 300 milliseconds is too quick to enjoy
+    the falling stars, so set the duration to a random number between 500 and 2000 milliseconds,
+    so stars fall at different speeds.*/
+
+    val set = AnimatorSet()
+    set.playTogether(mover, rotator)
+    set.duration = (Math.random() * 1500 + 500).toLong()
+   /* Once newStar has fallen off the bottom of the screen, it should be removed from the container.
+    Set a simple listener to wait for the end of the animation and remove it. Then start the
+            animation.*/
+    set.addListener(object : AnimatorListenerAdapter() {
+        override fun onAnimationEnd(animation: Animator?) {
+            container.removeView(newStar)
+        }
+    })
+    set.start()
+
+
+
+}
 
    // You can, and should, use ObjectAnimator for all property animations in your application.
 
